@@ -59,32 +59,55 @@ python examples/data_preprocess/pixel_reasoner/mvbench.py \
 ```
 </details>
 
-### 步骤 3: 运行推理
+### 步骤 3: 根据你的硬件选择推理脚本
+
+#### 如果你有 2x RTX 4090 (推荐) ⭐
 
 ```bash
-# 使用专用推理脚本（推荐）
+bash examples/train/pixel_reasoner/inference_2x4090.sh
+```
+
+#### 如果你有 1x RTX 4090 (快速测试)
+
+```bash
+bash examples/train/pixel_reasoner/inference_single_4090.sh
+```
+
+#### 如果你有 8x H100/A100 (完整配置)
+
+```bash
 bash examples/train/pixel_reasoner/inference.sh
 ```
 
-## 💻 推理方式对比
+**💡 不知道选哪个？** 查看 [RTX4090配置指南](examples/train/pixel_reasoner/RTX4090_CONFIG.md)
 
-### 方式 1: 批量评估（推荐用于性能评测）
+## 💻 硬件配置对比
 
-使用 `inference.sh` 在完整数据集上评估：
+| 配置 | 脚本 | 显存 | Batch Size | 速度 | 适用场景 |
+|------|------|------|------------|------|----------|
+| **2x RTX 4090** ⭐ | `inference_2x4090.sh` | 48GB | 32 | 中等 | **推荐配置** |
+| **1x RTX 4090** | `inference_single_4090.sh` | 24GB | 8 | 慢 | 快速验证 |
+| **8x H100/A100** | `inference.sh` | 640GB | 128 | 快 | 生产环境 |
+
+### 方式 1: 2x RTX 4090 批量评估（推荐）⭐
+
+针对消费级GPU优化的配置：
 
 ```bash
-bash examples/train/pixel_reasoner/inference.sh
+bash examples/train/pixel_reasoner/inference_2x4090.sh
 ```
 
 **优势**:
+- 专为RTX 4090优化的参数
+- 性能与成本的最佳平衡
 - 完整的性能指标
 - 自动启动工具服务器
-- 支持多GPU并行
 
 **配置**:
 - 默认使用 InfoVQA 数据集
-- 需要 8张 H100/A100 80GB GPU（可调整）
-- 编辑脚本修改数据集或GPU配置
+- 显存占用: ~15-18GB/卡
+- 预期时间: 30-60分钟/数据集
+- [详细配置说明](examples/train/pixel_reasoner/RTX4090_CONFIG.md)
 
 ### 方式 2: 单样本测试（推荐用于快速验证）
 
@@ -106,25 +129,36 @@ python examples/train/pixel_reasoner/quick_inference.py \
 
 ## 🛠️ 硬件要求
 
-### 推荐配置
-- 8张 H100/A100 80GB GPU
-- 512GB+ RAM
-- 2TB+ SSD存储
+### ⭐ RTX 4090 配置（消费级GPU，推荐）
 
-### 最小配置
-- 4张 A100 40GB GPU
-- 需要调整以下参数：
-  ```bash
-  n_gpus_per_node=4
-  batch_size=64
-  gpu_memory_utilization=0.6
-  ```
+**2x RTX 4090** (最佳性价比)
+- 显存: 2 × 24GB = 48GB
+- 内存: 64GB+ RAM
+- 存储: 500GB+ SSD
+- 性能: 完整评估约30-60分钟/数据集
+- 脚本: `inference_2x4090.sh`
+
+**1x RTX 4090** (最小配置)
+- 显存: 24GB
+- 内存: 32GB+ RAM
+- 存储: 200GB+ SSD
+- 性能: 适合快速测试
+- 脚本: `inference_single_4090.sh`
+
+### 数据中心配置
+
+**8x H100/A100** (生产环境)
+- 显存: 8 × 80GB = 640GB
+- 内存: 512GB+ RAM
+- 存储: 2TB+ SSD
+- 性能: 最快，适合大规模评估
+- 脚本: `inference.sh`
 
 ## 🔧 常见配置修改
 
 ### 修改评估数据集
 
-编辑 `inference.sh` 中的 `val_data` 变量：
+编辑相应的推理脚本（如 `inference_2x4090.sh`）中的 `val_data` 变量：
 
 ```bash
 # InfoVQA（默认）
@@ -133,13 +167,19 @@ val_data=[$(pwd)/data/pixel_reasoner/info_vqa/test.parquet]
 # 或切换到其他数据集
 # val_data=[$(pwd)/data/pixel_reasoner/tallyqa/test.parquet]
 # val_data=[$(pwd)/data/pixel_reasoner/vstar/test.parquet]
+# val_data=[$(pwd)/data/pixel_reasoner/mvbench/test.parquet]
 ```
 
-### 调整GPU数量
+### RTX 4090 专属优化
 
+**完整配置说明**: 请查看 [RTX4090_CONFIG.md](examples/train/pixel_reasoner/RTX4090_CONFIG.md)
+
+**快速调优**（如果遇到显存不足）：
 ```bash
-# 在inference.sh中修改
-n_gpus_per_node=4  # 设置为你的GPU数量
+# 编辑 inference_2x4090.sh
+batch_size=16              # 从32降到16
+gpu_memory_utilization=0.55  # 从0.65降到0.55
+max_prompt_length=8192     # 从16384降到8192
 ```
 
 ### 内存优化
