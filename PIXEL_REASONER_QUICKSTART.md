@@ -16,6 +16,21 @@
 # 安装VerlTool依赖（参考主README）
 # 重要：Pixel-Reasoner需要transformers<4.53.0
 pip install "transformers<4.53.0"
+
+# 安装下载工具（用于离线下载模型和数据）
+pip install -U huggingface_hub
+```
+
+**🇨🇳 国内用户推荐**: 使用HuggingFace镜像加速下载
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
+**💾 离线下载**: 如果需要提前下载模型和数据到本地，查看 [下载指南](examples/train/pixel_reasoner/DOWNLOAD_README.md)
+```bash
+# 快速下载所有内容（推荐）
+python examples/train/pixel_reasoner/download_models.py
+source local_paths.sh
 ```
 
 ### 步骤 2: 准备评估数据
