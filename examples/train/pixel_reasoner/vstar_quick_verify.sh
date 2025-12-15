@@ -17,8 +17,12 @@ fi
 
 # Model configuration
 if [ -z "$PIXEL_REASONER_MODEL" ]; then
-    # Try local path first
-    if [ -d "./models/pixel_reasoner_3b" ]; then
+    # Try user's custom path first
+    if [ -d "/mnt/data/pixel_reasoner_3b" ]; then
+        model_name="/mnt/data/pixel_reasoner_3b"
+        echo "Using custom model path: $model_name"
+    # Then try default local path
+    elif [ -d "./models/pixel_reasoner_3b" ]; then
         model_name="./models/pixel_reasoner_3b"
         echo "Using local model: $model_name"
     else
@@ -31,26 +35,45 @@ else
 fi
 
 # Dataset configuration - VStar only
-dataset_name=pixel_reasoner/vstar
-val_data=[$(pwd)/data/${dataset_name}/test.parquet]
+# Check custom path first, then default path
+if [ -f "/mnt/data/pixel_reasoner/vstar/test.parquet" ]; then
+    val_data=[/mnt/data/pixel_reasoner/vstar/test.parquet]
+    echo "Using custom dataset path: /mnt/data/pixel_reasoner/vstar/test.parquet"
+elif [ -f "$(pwd)/data/pixel_reasoner/vstar/test.parquet" ]; then
+    val_data=[$(pwd)/data/pixel_reasoner/vstar/test.parquet]
+    echo "Using local dataset path: $(pwd)/data/pixel_reasoner/vstar/test.parquet"
+else
+    val_data=[$(pwd)/data/pixel_reasoner/vstar/test.parquet]
+fi
 
-# Check if dataset exists
-if [ ! -f "$(pwd)/data/${dataset_name}/test.parquet" ]; then
+# Check if dataset exists (check all possible locations)
+dataset_found=false
+if [ -f "/mnt/data/pixel_reasoner/vstar/test.parquet" ]; then
+    dataset_found=true
+    dataset_path="/mnt/data/pixel_reasoner/vstar/test.parquet"
+elif [ -f "$(pwd)/data/pixel_reasoner/vstar/test.parquet" ]; then
+    dataset_found=true
+    dataset_path="$(pwd)/data/pixel_reasoner/vstar/test.parquet"
+fi
+
+if [ "$dataset_found" = false ]; then
     echo ""
     echo "Error: VStar dataset not found!"
-    echo "Expected: $(pwd)/data/${dataset_name}/test.parquet"
+    echo "Searched in:"
+    echo "  - /mnt/data/pixel_reasoner/vstar/test.parquet"
+    echo "  - $(pwd)/data/pixel_reasoner/vstar/test.parquet"
     echo ""
     echo "Please prepare the dataset first:"
     echo "  python examples/data_preprocess/pixel_reasoner/vstar.py \\"
-    if [ -n "$VSTAR_DATA" ]; then
-        echo "    --dataset_path \$VSTAR_DATA \\"
-    else
-        echo "    --dataset_path ./data/pixel_reasoner/vstar_raw \\"
-    fi
+    echo "    --dataset_path /mnt/data/pixel_reasoner/vstar_raw \\"
     echo "    --split test \\"
-    echo "    --local_dir data/pixel_reasoner/vstar"
+    echo "    --local_dir /mnt/data/pixel_reasoner/vstar"
+    echo ""
+    echo "This will convert the raw data to parquet format needed for inference."
     echo ""
     exit 1
+else
+    echo "Dataset found: $dataset_path"
 fi
 
 # Hardware - 2x RTX 4090
