@@ -91,8 +91,8 @@ val_batch_size=8
 ppo_mini_batch_size=4
 ppo_micro_batch_size_per_gpu=1
 
-# Token limits - reduced to fit in KV cache
-max_prompt_length=4096
+# Token limits - balanced for vision-language model
+max_prompt_length=8192
 max_response_length=2048
 max_obs_length=2048
 ppo_max_token_len_per_gpu=$(expr $max_prompt_length + $max_response_length)
@@ -172,7 +172,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     data.val_batch_size=$val_batch_size \
     data.max_prompt_length=$max_prompt_length \
     data.max_response_length=$max_response_length \
-    data.filter_overlong_prompts=True \
+    data.filter_overlong_prompts=False \
     data.truncation='right' \
     reward_model.reward_manager=$reward_manager \
     reward_model.launch_reward_fn_async=True \
@@ -204,7 +204,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     actor_rollout_ref.rollout.free_cache_engine=True \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.gpu_memory_utilization=$gpu_memory_utilization \
-    actor_rollout_ref.rollout.max_model_len=6144 \
+    actor_rollout_ref.rollout.max_model_len=10240 \
     actor_rollout_ref.rollout.temperature=$temperature \
     actor_rollout_ref.rollout.top_p=$top_p \
     actor_rollout_ref.rollout.top_k=-1 \
