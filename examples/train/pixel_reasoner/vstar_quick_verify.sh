@@ -165,7 +165,9 @@ echo ""
 
 PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     algorithm.adv_estimator=$rl_alg \
+    data.train_files=$val_data \
     data.val_files=$val_data \
+    data.train_batch_size=$batch_size \
     data.dataloader_num_workers=2 \
     data.val_batch_size=$val_batch_size \
     data.max_prompt_length=$max_prompt_length \
