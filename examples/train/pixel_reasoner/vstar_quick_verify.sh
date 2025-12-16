@@ -80,21 +80,21 @@ fi
 n_gpus_per_node=2
 n_nodes=1
 
-# Sampling
+# Sampling - minimal to reduce memory
 temperature=1.0
 top_p=1.0
-n=4
+n=2
 
-# Batch size - minimal settings for stability
-batch_size=4
-val_batch_size=4
-ppo_mini_batch_size=2
+# Batch size - absolute minimum
+batch_size=2
+val_batch_size=2
+ppo_mini_batch_size=1
 ppo_micro_batch_size_per_gpu=1
 
-# Token limits - balanced for vision-language model
-max_prompt_length=8192
-max_response_length=2048
-max_obs_length=2048
+# Token limits - minimal to reduce memory
+max_prompt_length=6144
+max_response_length=1536
+max_obs_length=1536
 ppo_max_token_len_per_gpu=$(expr $max_prompt_length + $max_response_length)
 
 # Agent config
@@ -106,12 +106,12 @@ additional_eos_token_ids=[151645]
 mask_observations=True
 enable_mtrl=True
 
-# VLLM config - minimal for stability with tensor parallelism
+# VLLM config - absolute minimum with tensor parallelism
 tensor_model_parallel_size=2
-gpu_memory_utilization=0.75
+gpu_memory_utilization=0.60
 log_prob_micro_batch_size_per_gpu=1
-max_num_batched_tokens=1024
-max_num_seqs=8
+max_num_batched_tokens=512
+max_num_seqs=4
 
 # Algorithm
 strategy="fsdp2"
@@ -197,14 +197,14 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     actor_rollout_ref.agent.action_stop_tokens=$action_stop_tokens_file \
     actor_rollout_ref.agent.enable_mtrl=$enable_mtrl \
     actor_rollout_ref.agent.max_action_length=$max_action_length \
-    actor_rollout_ref.agent.max_concurrent_trajectories=2 \
+    actor_rollout_ref.agent.max_concurrent_trajectories=1 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$tensor_model_parallel_size \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=$log_prob_micro_batch_size_per_gpu \
-    actor_rollout_ref.rollout.enforce_eager=False \
+    actor_rollout_ref.rollout.enforce_eager=True \
     actor_rollout_ref.rollout.free_cache_engine=True \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.gpu_memory_utilization=$gpu_memory_utilization \
-    actor_rollout_ref.rollout.max_model_len=10240 \
+    actor_rollout_ref.rollout.max_model_len=7680 \
     actor_rollout_ref.rollout.temperature=$temperature \
     actor_rollout_ref.rollout.top_p=$top_p \
     actor_rollout_ref.rollout.top_k=-1 \
