@@ -86,9 +86,9 @@ top_p=1.0
 n=4
 
 # Batch size - minimal settings for stability
-batch_size=8
-val_batch_size=8
-ppo_mini_batch_size=4
+batch_size=4
+val_batch_size=4
+ppo_mini_batch_size=2
 ppo_micro_batch_size_per_gpu=1
 
 # Token limits - balanced for vision-language model
@@ -106,9 +106,9 @@ additional_eos_token_ids=[151645]
 mask_observations=True
 enable_mtrl=True
 
-# VLLM config - minimal for stability
-tensor_model_parallel_size=1
-gpu_memory_utilization=0.50
+# VLLM config - minimal for stability with tensor parallelism
+tensor_model_parallel_size=2
+gpu_memory_utilization=0.75
 log_prob_micro_batch_size_per_gpu=1
 max_num_batched_tokens=1024
 max_num_seqs=8
@@ -197,7 +197,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     actor_rollout_ref.agent.action_stop_tokens=$action_stop_tokens_file \
     actor_rollout_ref.agent.enable_mtrl=$enable_mtrl \
     actor_rollout_ref.agent.max_action_length=$max_action_length \
-    actor_rollout_ref.agent.max_concurrent_trajectories=4 \
+    actor_rollout_ref.agent.max_concurrent_trajectories=2 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$tensor_model_parallel_size \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=$log_prob_micro_batch_size_per_gpu \
     actor_rollout_ref.rollout.enforce_eager=False \
