@@ -85,10 +85,10 @@ temperature=1.0
 top_p=1.0
 n=4
 
-# Batch size - optimized for 2x RTX 4090
-batch_size=32
-val_batch_size=32
-ppo_mini_batch_size=16
+# Batch size - conservative settings to avoid OOM
+batch_size=16
+val_batch_size=16
+ppo_mini_batch_size=8
 ppo_micro_batch_size_per_gpu=1
 
 # Token limits
@@ -106,12 +106,12 @@ additional_eos_token_ids=[151645]
 mask_observations=True
 enable_mtrl=True
 
-# VLLM config
+# VLLM config - conservative to avoid OOM
 tensor_model_parallel_size=1
-gpu_memory_utilization=0.55
-log_prob_micro_batch_size_per_gpu=4
-max_num_batched_tokens=3000
-max_num_seqs=32
+gpu_memory_utilization=0.45
+log_prob_micro_batch_size_per_gpu=2
+max_num_batched_tokens=2000
+max_num_seqs=16
 
 # Algorithm
 strategy="fsdp2"
@@ -197,7 +197,7 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     actor_rollout_ref.agent.action_stop_tokens=$action_stop_tokens_file \
     actor_rollout_ref.agent.enable_mtrl=$enable_mtrl \
     actor_rollout_ref.agent.max_action_length=$max_action_length \
-    actor_rollout_ref.agent.max_concurrent_trajectories=$batch_size \
+    actor_rollout_ref.agent.max_concurrent_trajectories=8 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$tensor_model_parallel_size \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=$log_prob_micro_batch_size_per_gpu \
     actor_rollout_ref.rollout.enforce_eager=False \
