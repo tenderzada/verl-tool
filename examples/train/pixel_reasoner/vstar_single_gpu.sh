@@ -34,7 +34,9 @@ echo ""
 
 PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
+    data.train_files=[$dataset_path] \
     data.val_files=[$dataset_path] \
+    data.train_batch_size=1 \
     data.val_batch_size=1 \
     data.max_prompt_length=3072 \
     data.max_response_length=768 \
@@ -44,6 +46,11 @@ PYTHONUNBUFFERED=1 python3 -m verl_tool.trainer.main_ppo \
     reward_model.launch_reward_fn_async=True \
     actor_rollout_ref.model.path=$model_name \
     actor_rollout_ref.model.trust_remote_code=True \
+    actor_rollout_ref.actor.ppo_mini_batch_size=1 \
+    actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
+    actor_rollout_ref.actor.use_dynamic_bsz=False \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=3840 \
+    actor_rollout_ref.actor.strategy=fsdp2 \
     actor_rollout_ref.agent.enable_agent=True \
     actor_rollout_ref.agent.tool_server_url=$tool_server_url \
     actor_rollout_ref.agent.max_prompt_length=3072 \
