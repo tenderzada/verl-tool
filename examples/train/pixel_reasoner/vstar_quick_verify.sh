@@ -108,7 +108,7 @@ enable_mtrl=True
 
 # VLLM config
 tensor_model_parallel_size=1
-gpu_memory_utilization=0.65
+gpu_memory_utilization=0.55
 log_prob_micro_batch_size_per_gpu=4
 max_num_batched_tokens=3000
 max_num_seqs=32
